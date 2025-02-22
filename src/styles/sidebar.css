@@ -1,0 +1,78 @@
+/* Reset body margin */
+body {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    background: #f9f9f9;
+    overflow-x: hidden;
+  }
+  
+  /* Sidebar styles */
+  .sleek-sidebar {
+    width: 220px;
+    height: 100vh;
+    background: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    padding: 10px 0px 0px 10px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+  
+    /* Make sidebar fixed so it never moves on scroll */
+    position: fixed;
+    top: 0;
+    left: 0;
+  }
+  
+  /* Ensure the main content doesn't overlap the sidebar */
+  .main-content {
+    margin-left: 220px; /* Matches sidebar width */
+    padding: 20px;
+  }
+  
+  /* Sidebar Logo */
+  .sidebar-logo {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 10px;
+    color: #333;
+    border-bottom: 1px solid #eaeaea;
+  }
+  
+  /* Sidebar Menu */
+  .sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+  }
+  
+  .sidebar-item {
+    margin: 10px 0;
+  }
+  
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 10px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    transition: all 0.3s ease;
+  }
+  
+  .sidebar-link:hover,
+  .sidebar-item.active .sidebar-link {
+    background: #f3f3f3;
+    color: #007aff;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  
+  /* Sidebar Icons */
+  .sidebar-link svg {
+    width: 18px;
+    height: 18px;
+  }
+  
