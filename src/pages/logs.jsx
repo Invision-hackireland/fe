@@ -266,10 +266,10 @@ export const LogsPage = () => {
         </div>
       </div>
 
-      <div className="sidebar">
-        <div className="sidebar-header">
+      <div className="sidebarmini">
+        <div className="sidebarmini-header">
           <Camera />
-          <h2 className="sidebar-title">Analysis Results</h2>
+          <h2 className="sidebarmini-title">Analysis Results</h2>
         </div>
 
         {selectedCamera && (

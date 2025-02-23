@@ -104,7 +104,6 @@ body {
 @media (prefers-color-scheme: dark) {
   body {
     background: #111827;
-    color: #f9fafb;
   }
   
   .sleek-sidebar {

@@ -145,15 +145,15 @@
   display: block;
 }
 
-/* Sidebar */
-.sidebar {
+/* sidebarmini */
+.sidebarmini {
   width: 24rem;
   background: white;
   border-left: 1px solid var(--gray-200);
   padding: 1.5rem;
 }
 
-.sidebar-header {
+.sidebarmini-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;  color: #111827;
@@ -161,7 +161,7 @@
   margin-bottom: 1.5rem;
 }
 
-.sidebar-title {
+.sidebarmini-title {
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
@@ -288,7 +288,7 @@
     flex-direction: column;
   }
   
-  .sidebar {
+  .sidebarmini {
     width: 100%;
     border-left: none;
     border-top: 1px solid var(--gray-200);
