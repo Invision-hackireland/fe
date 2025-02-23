@@ -9,13 +9,19 @@ import { CameraPage } from './pages/camera.jsx';
 import { RulesPage } from './pages/rules.jsx';
 import Sidebar from './components/sidebar.jsx';
 import PageContainer from './components/page-container.jsx';
+import { useLocation } from 'react-router-dom';
+
+const ConditionalSidebar = () => {
+  const location = useLocation();
+  return ((location.pathname === '/auth') || (location.pathname === '/')) ? null : <Sidebar /> ;
+};
 
 // import './index.css'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <Sidebar />
+    <ConditionalSidebar />
       <Routes>
         <Route path="/" element={<PageContainer><LandingPage /></PageContainer>} />
         <Route path="/dashboard" element={<PageContainer><DashboardPage /></PageContainer>} />

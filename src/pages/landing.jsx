@@ -1,16 +1,27 @@
 import React from 'react';
-import logo from '../assets/logo.png';
+import Logoicon from '../assets/logo.svg'
+
+import { useNavigate } from 'react-router-dom';
+
+
 
 function Header() {
+    const navigate = useNavigate();
+
+    const handleNavigation = () => {
+      navigate('/monitor');
+    };
+  
+    
   return (
     <header className="header">
         <div style={{magin:0, padding:0}}>
-            <img  style={{ margin: 0, border: 'none' }} src={logo} alt="Description of image" width={300} height={300}/>
+        <img src={Logoicon} alt="Logo" height={500} width={500}/>
         </div>
     
       <nav>
         <button className="nav-button">Sign Up</button>
-        <button className="nav-button demo">Demo</button>
+        <button className="nav-button demo" onClick={handleNavigation}>Demo</button>
       </nav>
     </header>
   );

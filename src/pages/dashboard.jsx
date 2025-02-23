@@ -1,7 +1,7 @@
 export const DashboardPage = () => {
     return (
         <>
-            <h1>Dashboard Page</h1>
+            <h1>Inspect what cameras are active, and last alert</h1>
         </>
     )
 }
