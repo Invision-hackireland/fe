@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { BASE_API_URL } from '../constants';
+import { USER_ID } from '../constants';
 
 export const RoomsPage = () => {
   const [roomName, setRoomName] = useState('');
@@ -8,7 +10,6 @@ export const RoomsPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const USER_ID = 'ba3197a8-f182-11ef-80e2-77fbe9534181'; // Replace with actual user ID
 
   const roomTypes = [
     { id: 'office', label: 'Office' },
@@ -26,7 +27,7 @@ export const RoomsPage = () => {
   const fetchRooms = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`https://7379-89-101-154-45.ngrok-free.app/rooms?user_id=${USER_ID}`,{
+      const response = await fetch(`${BASE_API_URL}/rooms?user_id=${USER_ID}`,{
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -60,7 +61,7 @@ export const RoomsPage = () => {
     
     try {
       setIsLoading(true);
-      const response = await fetch('https://3e91-89-101-154-45.ngrok-free.app/rooms', {
+      const response = await fetch(`BASE_API_URL/rooms`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -99,7 +100,7 @@ export const RoomsPage = () => {
   const deleteRoom = async (id) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`https://3e91-89-101-154-45.ngrok-free.app/rooms/${id}`, {
+      const response = await fetch(`BASE_API_URL/rooms/${id}`, {
         method: 'DELETE',
       });
 

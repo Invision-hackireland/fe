@@ -1,6 +1,7 @@
 import { createContext, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { BASE_API_URL } from "../constants";
 
 const GlobalContext = createContext();
 
@@ -16,7 +17,7 @@ export const AuthPage = ({ setImportantId }) => {
   const SignUpFunction = () => {
     axios
       .post(
-        "https://e71e-89-101-154-45.ngrok-free.app/users",
+        `${BASE_API_URL}/users`,
         {
           firstname: firstName,
           email: email,

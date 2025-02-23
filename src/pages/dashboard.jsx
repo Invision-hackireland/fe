@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/dashboard.css';
+import { BASE_API_URL } from '../constants';
+import { USER_ID } from '../constants';
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
@@ -23,11 +25,11 @@ export const DashboardPage = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://3e91-89-101-154-45.ngrok-free.app/dashboardstats', {
+        const response = await fetch(`${BASE_API_URL}/dashboardstats`, {
           headers: {
             'Authorization': '123',
             'Content-Type': 'application/json',
-            'X-User-ID': 'ba3197a8-f182-11ef-80e2-77fbe9534181',
+            'X-User-ID': `${USER_ID}`,
             'ngrok-skip-browser-warning': '69420'
           }
         });
