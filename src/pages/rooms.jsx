@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BASE_API_URL } from '../constants';
 import { USER_ID } from '../constants';
+import '../styles/rooms-manager.css';
 
 export const RoomsPage = () => {
   const [roomName, setRoomName] = useState('');
@@ -61,7 +62,7 @@ export const RoomsPage = () => {
     
     try {
       setIsLoading(true);
-      const response = await fetch(`BASE_API_URL/rooms`, {
+      const response = await fetch(`${BASE_API_URL}/rooms`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,19 +75,9 @@ export const RoomsPage = () => {
 
       if (!response.ok) throw new Error('Failed to add room');
       
-      const newRoom = await response.json();
+      fetchRooms();
       
-      // Transform the new room to match our expected format
-      const roomWithDetails = {
-        id: newRoom.id,
-        name: newRoom.name,
-        type: roomType,
-        status: 'active',
-        cameras: newRoom.num_cameras || 0,
-        rules: newRoom.num_rules || 0
-      };
-      
-      setRooms([...rooms, roomWithDetails]);
+      //setRooms(newRooms);
       setRoomName('');
       setError(null);
     } catch (err) {
@@ -100,7 +91,7 @@ export const RoomsPage = () => {
   const deleteRoom = async (id) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`BASE_API_URL/rooms/${id}`, {
+      const response = await fetch(`${BASE_API_URL}/rooms/${id}`, {
         method: 'DELETE',
       });
 
@@ -134,7 +125,7 @@ export const RoomsPage = () => {
 
   // Filter rooms based on search
   const filteredRooms = rooms.filter(room =>
-    room.name.toLowerCase().includes(searchQuery.toLowerCase())
+    room?.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
