@@ -4,7 +4,7 @@ const PageContainer = ({ children }) => {
   return (
     <div
       style={{
-        marginLeft: "220px", // Ensures space for the fixed sidebar
+        marginLeft: "230px", // Ensures space for the fixed sidebar
         minHeight: "100vh",
         background: "#f9f9f9",
         fontFamily: "Inter, sans-serif",

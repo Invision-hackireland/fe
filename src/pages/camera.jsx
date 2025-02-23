@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { BASE_API_URL , USER_ID} from '../constants';
 import '../styles/camera-manager.css';
 
 export const CameraPage = ({ImportantId}) => {
@@ -11,8 +12,8 @@ export const CameraPage = ({ImportantId}) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
-      useEffect(() => {
-        fetchLogs();
+      React.useEffect(() => {
+        fetchCameras();
       }, []);
     
       const fetchCameras = async () => {

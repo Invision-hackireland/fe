@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BASE_API_URL } from '../constants';
 import { USER_ID } from '../constants';
 import '../styles/rooms-manager.css';
