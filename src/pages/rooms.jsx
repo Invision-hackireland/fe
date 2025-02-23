@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/rooms-manager.css';
 
 export const RoomsPage = () => {
   const [roomName, setRoomName] = useState('');
@@ -8,6 +7,8 @@ export const RoomsPage = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const USER_ID = 'ba3197a8-f182-11ef-80e2-77fbe9534181'; // Replace with actual user ID
 
   const roomTypes = [
     { id: 'office', label: 'Office' },
@@ -25,10 +26,27 @@ export const RoomsPage = () => {
   const fetchRooms = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('https://3e91-89-101-154-45.ngrok-free.app/rooms');
+      const response = await fetch(`https://7379-89-101-154-45.ngrok-free.app/rooms?user_id=${USER_ID}`,{
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }});
+      console.log(response);
       if (!response.ok) throw new Error('Failed to fetch rooms');
       const data = await response.json();
-      setRooms(data);
+      
+      // Transform the data to match our component's expected format
+      const transformedRooms = data.map(room => ({
+        id: room.id,
+        name: room.name,
+        type: 'office', // Default type since it's not in the API response
+        status: 'active', // Default status since it's not in the API response
+        cameras: room.num_cameras || 0,
+        rules: room.num_rules || 0
+      }));
+      
+      setRooms(transformedRooms);
+      setError(null);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -49,20 +67,22 @@ export const RoomsPage = () => {
         },
         body: JSON.stringify({
           name: roomName.trim(),
-          type: roomType,
-          user_id: 'ba3197a8-f182-11ef-80e2-77fbe9534181' // Replace with actual user ID
+          user_id: USER_ID
         }),
       });
 
       if (!response.ok) throw new Error('Failed to add room');
       
       const newRoom = await response.json();
+      
+      // Transform the new room to match our expected format
       const roomWithDetails = {
-        ...newRoom,
+        id: newRoom.id,
+        name: newRoom.name,
         type: roomType,
-        dateAdded: new Date().toISOString(),
         status: 'active',
-        cameras: 0
+        cameras: newRoom.num_cameras || 0,
+        rules: newRoom.num_rules || 0
       };
       
       setRooms([...rooms, roomWithDetails]);
@@ -100,18 +120,6 @@ export const RoomsPage = () => {
       const room = rooms.find(r => r.id === id);
       const newStatus = room.status === 'active' ? 'inactive' : 'active';
       
-      const response = await fetch(`https://3e91-89-101-154-45.ngrok-free.app/rooms/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          status: newStatus
-        }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update room status');
-
       setRooms(rooms.map(room => 
         room.id === id 
           ? { ...room, status: newStatus }
@@ -217,6 +225,7 @@ export const RoomsPage = () => {
                       <th>Type</th>
                       <th>Status</th>
                       <th>Cameras</th>
+                      <th>Rules</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
@@ -236,6 +245,9 @@ export const RoomsPage = () => {
                         </td>
                         <td className="cameras-cell">
                           {room.cameras} cameras
+                        </td>
+                        <td className="rules-cell">
+                          {room.rules} rules
                         </td>
                         <td>
                           <div className="action-buttons">
