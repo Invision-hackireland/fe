@@ -24,19 +24,18 @@ export const CameraPage = ({ImportantId}) => {
             headers: {
               'Content-Type': 'application/json',
             }});
-            console.log(response);
             if (!response.ok) throw new Error('Failed to fetch rooms');
             const data = await response.json();
+
+            console.log(data);
             
             // Transform the data to match our component's expected format
             const transformedRooms = data.map(room => ({
-              name: room.name,
-              location: room.location,
-              ipAddress: 'office', // Default type since it's not in the API response
-
+              room: room.room.name,
+              ipAddress: room.ip_address,
             }));
             
-            setCameraName(transformedRooms);
+            setCameras(transformedRooms);
             setError(null);
           } catch (err) {
             setError(err.message);
@@ -196,7 +195,6 @@ export const CameraPage = ({ImportantId}) => {
             <table className="cameras-table">
               <thead>
                 <tr>
-                  <th>Camera Name</th>
                   <th>Room</th>
                   <th>IP Address</th>
                   <th>Status</th>
@@ -207,19 +205,16 @@ export const CameraPage = ({ImportantId}) => {
               <tbody>
                 {cameras.map(camera => (
                   <tr key={camera.id}>
-                    <td className="camera-name">
-                      <span className="name-text">{camera.name}</span>
-                    </td>
                     <td>{camera.room}</td>
                     <td>
-                      <code className="ip-address">{camera.ip}</code>
+                      <code className="ip-address">{camera.ipAddress}</code>
                     </td>
                     <td>
                       <span className={getStatusClass(camera.status)}>
-                        {camera.status}
+                        Online
                       </span>
                     </td>
-                    <td>{new Date(camera.date_created).toLocaleDateString()}</td>
+                    <td>23rd February, 2025</td>
                     <td>
                       <div className="action-buttons">
                         <button 
