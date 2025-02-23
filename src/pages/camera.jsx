@@ -1,142 +1,182 @@
 import React, { useState } from 'react';
+import '../styles/camera-manager.css';
 
 export const CameraPage = () => {
   const [cameraName, setCameraName] = useState('');
   const [room, setRoom] = useState('');
   const [ipAddress, setIpAddress] = useState('');
   const [cameras, setCameras] = useState([]);
+  const [isFormValid, setIsFormValid] = useState(false);
+
+  // Validate form fields
+  const validateForm = (name, room, ip) => {
+    const isValid = name.trim() && room.trim() && ip.trim();
+    setIsFormValid(isValid);
+    return isValid;
+  };
+
+  // Handle input changes
+  const handleInputChange = (e, setter) => {
+    const value = e.target.value;
+    setter(value);
+    validateForm(
+      setter === setCameraName ? value : cameraName,
+      setter === setRoom ? value : room,
+      setter === setIpAddress ? value : ipAddress
+    );
+  };
 
   // Adds a new camera if all fields are filled
   const addCamera = () => {
-    if (!cameraName.trim() || !room.trim() || !ipAddress.trim()) return;
+    if (!validateForm(cameraName, room, ipAddress)) return;
+    
     const newCamera = {
-      id: Date.now(), // For demo purposes; in production consider using UUIDs.
+      id: Date.now(),
       name: cameraName,
       room: room,
       ip: ipAddress,
       date_created: new Date().toISOString(),
+      status: 'offline' // Initial status
     };
+    
     setCameras([...cameras, newCamera]);
     setCameraName('');
     setRoom('');
     setIpAddress('');
+    setIsFormValid(false);
   };
 
-  // Deletes a camera by filtering it out of the current cameras array.
+  // Deletes a camera
   const deleteCamera = (id) => {
     setCameras(cameras.filter(camera => camera.id !== id));
   };
 
+  // Get camera status class
+  const getStatusClass = (status) => {
+    return `status-badge ${status}`;
+  };
+
   return (
     <div className="camera-manager">
-      <h2>Camera Manager</h2>
-      <div className="input-section">
-        <input
-          type="text"
-          placeholder="Camera Name"
-          value={cameraName}
-          onChange={e => setCameraName(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Room"
-          value={room}
-          onChange={e => setRoom(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="IP Address"
-          value={ipAddress}
-          onChange={e => setIpAddress(e.target.value)}
-        />
-        <button onClick={addCamera}>Add Camera</button>
+      <div className="manager-header">
+        <div className="header-content">
+          <h1>Camera Manager</h1>
+          <p className="subtitle">Add and manage your security cameras</p>
+        </div>
+        <div className="header-stats">
+          <div className="stat-card">
+            <span className="stat-value">{cameras.length}</span>
+            <span className="stat-label">Total Cameras</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-value">{cameras.filter(c => c.status === 'online').length}</span>
+            <span className="stat-label">Online</span>
+          </div>
+        </div>
       </div>
+
+      <div className="content-card">
+        <div className="card-header">
+          <h2>Add New Camera</h2>
+        </div>
+        <div className="input-grid">
+          <div className="input-group">
+            <label htmlFor="camera-name">Camera Name</label>
+            <input
+              id="camera-name"
+              type="text"
+              placeholder="e.g., Front Door Camera"
+              value={cameraName}
+              onChange={(e) => handleInputChange(e, setCameraName)}
+            />
+          </div>
+          <div className="input-group">
+            <label htmlFor="room">Room Location</label>
+            <input
+              id="room"
+              type="text"
+              placeholder="e.g., Main Entrance"
+              value={room}
+              onChange={(e) => handleInputChange(e, setRoom)}
+            />
+          </div>
+          <div className="input-group">
+            <label htmlFor="ip-address">IP Address</label>
+            <input
+              id="ip-address"
+              type="text"
+              placeholder="e.g., 192.168.1.100"
+              value={ipAddress}
+              onChange={(e) => handleInputChange(e, setIpAddress)}
+            />
+          </div>
+          <button 
+            className={`add-button ${isFormValid ? 'active' : ''}`}
+            onClick={addCamera}
+            disabled={!isFormValid}
+          >
+            Add Camera
+          </button>
+        </div>
+      </div>
+
       {cameras.length > 0 && (
-        <table className="cameras-table">
-          <thead>
-            <tr>
-              <th>Camera Name</th>
-              <th>Room</th>
-              <th>IP Address</th>
-              <th>Date Added</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cameras.map(camera => (
-              <tr key={camera.id}>
-                <td>{camera.name}</td>
-                <td>{camera.room}</td>
-                <td>{camera.ip}</td>
-                <td>{new Date(camera.date_created).toLocaleString()}</td>
-                <td>
-                  <button onClick={() => deleteCamera(camera.id)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="content-card">
+          <div className="card-header">
+            <h2>Camera List</h2>
+            <span className="camera-count">{cameras.length} cameras</span>
+          </div>
+          <div className="table-container">
+            <table className="cameras-table">
+              <thead>
+                <tr>
+                  <th>Camera Name</th>
+                  <th>Room</th>
+                  <th>IP Address</th>
+                  <th>Status</th>
+                  <th>Date Added</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cameras.map(camera => (
+                  <tr key={camera.id}>
+                    <td className="camera-name">
+                      <span className="name-text">{camera.name}</span>
+                    </td>
+                    <td>{camera.room}</td>
+                    <td>
+                      <code className="ip-address">{camera.ip}</code>
+                    </td>
+                    <td>
+                      <span className={getStatusClass(camera.status)}>
+                        {camera.status}
+                      </span>
+                    </td>
+                    <td>{new Date(camera.date_created).toLocaleDateString()}</td>
+                    <td>
+                      <div className="action-buttons">
+                        <button 
+                          className="icon-button edit"
+                          onClick={() => {/* Add edit handler */}}
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          className="icon-button delete"
+                          onClick={() => deleteCamera(camera.id)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       )}
-      <style jsx>{`
-        .camera-manager {
-          margin: 20px;
-          font-family: Arial, sans-serif;
-        }
-        .input-section {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin-bottom: 20px;
-        }
-        .input-section input {
-          flex: 1;
-          min-width: 150px;
-          padding: 10px;
-          font-size: 1rem;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-        }
-        .input-section button {
-          padding: 10px 20px;
-          font-size: 1rem;
-          background-color: black;
-          color: #fff;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          transition: background-color 0.3s;
-        }
-        .input-section button:hover {
-          background-color: grey;
-        }
-        .cameras-table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-        .cameras-table th, .cameras-table td {
-          border: 1px solid #ddd;
-          padding: 10px;
-          text-align: left;
-        }
-        .cameras-table th {
-          background-color: #f0f0f0;
-        }
-        .cameras-table button {
-          padding: 5px 10px;
-          font-size: 0.9rem;
-          background-color: #e00;
-          color: #fff;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          transition: background-color 0.3s;
-        }
-        .cameras-table button:hover {
-          background-color: #c00;
-        }
-      `}</style>
     </div>
   );
 };
-
-
