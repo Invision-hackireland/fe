@@ -39,7 +39,7 @@ export const RoomsPage = ({ImportantId}) => {
       
       // Transform the data to match our component's expected format
       const transformedRooms = data.map(room => ({
-        id: room.id,
+        id: room.uid,
         name: room.name,
         type: 'office', // Default type since it's not in the API response
         status: 'active', // Default status since it's not in the API response
