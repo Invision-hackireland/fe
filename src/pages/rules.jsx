@@ -3,7 +3,7 @@ import '../styles/rules-manager.css';
 import { BASE_API_URL } from '../constants';
 import { USER_ID } from '../constants';
 
-export const RulesPage = () => {
+export const RulesPage = ({ImportantId}) => {
   const [ruleText, setRuleText] = useState('');
   const [rules, setRules] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);

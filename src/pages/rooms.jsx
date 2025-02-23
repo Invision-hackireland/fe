@@ -3,7 +3,7 @@ import { BASE_API_URL } from '../constants';
 import { USER_ID } from '../constants';
 import '../styles/rooms-manager.css';
 
-export const RoomsPage = () => {
+export const RoomsPage = ({ImportantId}) => {
   const [roomName, setRoomName] = useState('');
   const [roomType, setRoomType] = useState('office');
   const [rooms, setRooms] = useState([]);

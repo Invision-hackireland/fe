@@ -4,7 +4,7 @@ import '../styles/dashboard.css';
 import { BASE_API_URL } from '../constants';
 import { USER_ID } from '../constants';
 
-export const DashboardPage = () => {
+export const DashboardPage = ({ImportantId}) => {
   const navigate = useNavigate();
   const [selectedTimeframe, setSelectedTimeframe] = useState('24h');
   const [dashboardData, setDashboardData] = useState({

@@ -1,12 +1,48 @@
 import React, { useState } from 'react';
 import '../styles/camera-manager.css';
 
-export const CameraPage = () => {
+export const CameraPage = ({ImportantId}) => {
   const [cameraName, setCameraName] = useState('');
   const [room, setRoom] = useState('');
   const [ipAddress, setIpAddress] = useState('');
   const [cameras, setCameras] = useState([]);
   const [isFormValid, setIsFormValid] = useState(false);
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+      useEffect(() => {
+        fetchLogs();
+      }, []);
+    
+      const fetchCameras = async () => {
+          try {
+            setIsLoading(true);
+            const response = await fetch(`${BASE_API_URL}/cameras?user_id=${USER_ID}`,{
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            }});
+            console.log(response);
+            if (!response.ok) throw new Error('Failed to fetch rooms');
+            const data = await response.json();
+            
+            // Transform the data to match our component's expected format
+            const transformedRooms = data.map(room => ({
+              name: room.name,
+              location: room.location,
+              ipAddress: 'office', // Default type since it's not in the API response
+
+            }));
+            
+            setCameraName(transformedRooms);
+            setError(null);
+          } catch (err) {
+            setError(err.message);
+          } finally {
+            setIsLoading(false);
+          }
+        };
 
   // Validate form fields
   const validateForm = (name, room, ip) => {
@@ -27,29 +63,56 @@ export const CameraPage = () => {
   };
 
   // Adds a new camera if all fields are filled
-  const addCamera = () => {
-    if (!validateForm(cameraName, room, ipAddress)) return;
+  const addCamera = async () => {
+    if (!roomName.trim()) return;
     
-    const newCamera = {
-      id: Date.now(),
-      name: cameraName,
-      room: room,
-      ip: ipAddress,
-      date_created: new Date().toISOString(),
-      status: 'offline' // Initial status
-    };
-    
-    setCameras([...cameras, newCamera]);
-    setCameraName('');
-    setRoom('');
-    setIpAddress('');
-    setIsFormValid(false);
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${BASE_API_URL}/cameras`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: cameraName,
+          location: room,
+          ipAddress: ipAddress,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to add room');
+      
+      fetchCameras();
+      
+      //setRooms(newRooms);
+      setRoomName('');
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Deletes a camera
-  const deleteCamera = (id) => {
-    setCameras(cameras.filter(camera => camera.id !== id));
+  const deleteCamera = async (id) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`${BASE_API_URL}/cameras/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to delete room');
+      
+      setCameras(cameras.filter(camera => camera.id !== id));
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
+
 
   // Get camera status class
   const getStatusClass = (status) => {
