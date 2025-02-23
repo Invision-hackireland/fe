@@ -4,7 +4,7 @@ import axios from 'axios';
 const GlobalContext = createContext();
 
 
-export const AuthPage = () => {
+export const AuthPage = ({ setImportantId }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState()
   const [password, setPossword] = useState()
@@ -33,7 +33,8 @@ export const AuthPage = () => {
       console.log('Response:', data);
       // Handle the successful response
       console.log(data.id)
-      importantId = data.id
+      let importantId = data.id
+      setImportantId(importantId)
       const navigate = useNavigate();
       navigate('/rooms')
     })
