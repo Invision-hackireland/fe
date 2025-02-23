@@ -86,11 +86,13 @@ export const RulesPage = () => {
                     placeholder="Enter safety rule..."
                     value={ruleText}
                     onChange={e => setRuleText(e.target.value)}
+                    style={{width:'80%'}}
                   />
                   <button 
                     className="add-button"
                     onClick={addRule}
                     disabled={!ruleText.trim()}
+                    style={{width:'20%'}}
                   >
                     Add Rule
                   </button>

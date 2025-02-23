@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/rooms-manager.css';
 
 export const RoomsPage = () => {
@@ -6,6 +6,8 @@ export const RoomsPage = () => {
   const [roomType, setRoomType] = useState('office');
   const [rooms, setRooms] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const roomTypes = [
     { id: 'office', label: 'Office' },
@@ -14,24 +16,111 @@ export const RoomsPage = () => {
     { id: 'storage', label: 'Storage' }
   ];
 
+  // Fetch rooms on component mount
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
+  // Fetch all rooms
+  const fetchRooms = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('https://3e91-89-101-154-45.ngrok-free.app/rooms');
+      if (!response.ok) throw new Error('Failed to fetch rooms');
+      const data = await response.json();
+      setRooms(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Add new room
-  const addRoom = () => {
+  const addRoom = async () => {
     if (!roomName.trim()) return;
-    const newRoom = {
-      id: Date.now(),
-      name: roomName.trim(),
-      type: roomType,
-      dateAdded: new Date().toISOString(),
-      status: 'active',
-      cameras: 0
-    };
-    setRooms([...rooms, newRoom]);
-    setRoomName('');
+    
+    try {
+      setIsLoading(true);
+      const response = await fetch('https://3e91-89-101-154-45.ngrok-free.app/rooms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: roomName.trim(),
+          type: roomType,
+          user_id: 'ba3197a8-f182-11ef-80e2-77fbe9534181' // Replace with actual user ID
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to add room');
+      
+      const newRoom = await response.json();
+      const roomWithDetails = {
+        ...newRoom,
+        type: roomType,
+        dateAdded: new Date().toISOString(),
+        status: 'active',
+        cameras: 0
+      };
+      
+      setRooms([...rooms, roomWithDetails]);
+      setRoomName('');
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Delete room
-  const deleteRoom = (id) => {
-    setRooms(rooms.filter(room => room.id !== id));
+  const deleteRoom = async (id) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`https://3e91-89-101-154-45.ngrok-free.app/rooms/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) throw new Error('Failed to delete room');
+      
+      setRooms(rooms.filter(room => room.id !== id));
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Toggle room status
+  const toggleRoomStatus = async (id) => {
+    try {
+      const room = rooms.find(r => r.id === id);
+      const newStatus = room.status === 'active' ? 'inactive' : 'active';
+      
+      const response = await fetch(`https://3e91-89-101-154-45.ngrok-free.app/rooms/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          status: newStatus
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update room status');
+
+      setRooms(rooms.map(room => 
+        room.id === id 
+          ? { ...room, status: newStatus }
+          : room
+      ));
+      setError(null);
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   // Filter rooms based on search
@@ -39,21 +128,12 @@ export const RoomsPage = () => {
     room.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Toggle room status
-  const toggleRoomStatus = (id) => {
-    setRooms(rooms.map(room => 
-      room.id === id 
-        ? { ...room, status: room.status === 'active' ? 'inactive' : 'active' }
-        : room
-    ));
-  };
-
   return (
     <div className="rooms-page">
       <div className="rooms-header">
         <div className="header-content">
           <h1>Room Manager</h1>
-          <p className="subtitle">Manage and monitor your facility spaces</p>
+          {error && <div className="error-message">{error}</div>}
         </div>
         <div className="header-stats">
           <div className="stat-card">
@@ -85,6 +165,7 @@ export const RoomsPage = () => {
                   placeholder="e.g., Main Conference Room"
                   value={roomName}
                   onChange={e => setRoomName(e.target.value)}
+                  disabled={isLoading}
                 />
               </div>
               
@@ -94,6 +175,7 @@ export const RoomsPage = () => {
                   id="room-type"
                   value={roomType}
                   onChange={e => setRoomType(e.target.value)}
+                  disabled={isLoading}
                 >
                   {roomTypes.map(type => (
                     <option key={type.id} value={type.id}>
@@ -106,9 +188,9 @@ export const RoomsPage = () => {
               <button 
                 className="add-button"
                 onClick={addRoom}
-                disabled={!roomName.trim()}
+                disabled={isLoading || !roomName.trim()}
               >
-                Add Room
+                {isLoading ? 'Adding...' : 'Add Room'}
               </button>
             </div>
           </div>
@@ -160,18 +242,21 @@ export const RoomsPage = () => {
                             <button 
                               className="icon-button edit"
                               onClick={() => {/* Add edit handler */}}
+                              disabled={isLoading}
                             >
                               Edit
                             </button>
                             <button 
                               className="icon-button toggle"
                               onClick={() => toggleRoomStatus(room.id)}
+                              disabled={isLoading}
                             >
                               {room.status === 'active' ? 'Disable' : 'Enable'}
                             </button>
                             <button 
                               className="icon-button delete"
                               onClick={() => deleteRoom(room.id)}
+                              disabled={isLoading}
                             >
                               Delete
                             </button>
@@ -185,11 +270,19 @@ export const RoomsPage = () => {
             </div>
           )}
 
-          {rooms.length === 0 && (
+          {rooms.length === 0 && !isLoading && (
             <div className="content-card">
               <div className="empty-state">
                 <p>No rooms added yet.</p>
                 <p>Add your first room to get started!</p>
+              </div>
+            </div>
+          )}
+
+          {isLoading && rooms.length === 0 && (
+            <div className="content-card">
+              <div className="loading-state">
+                <p>Loading rooms...</p>
               </div>
             </div>
           )}

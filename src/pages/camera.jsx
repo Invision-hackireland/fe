@@ -61,7 +61,7 @@ export const CameraPage = () => {
       <div className="manager-header">
         <div className="header-content">
           <h1>Camera Manager</h1>
-          <p className="subtitle">Add and manage your security cameras</p>
+
         </div>
         <div className="header-stats">
           <div className="stat-card">
@@ -110,6 +110,7 @@ export const CameraPage = () => {
               onChange={(e) => handleInputChange(e, setIpAddress)}
             />
           </div>
+          <div className="input-group">
           <button 
             className={`add-button ${isFormValid ? 'active' : ''}`}
             onClick={addCamera}
@@ -117,6 +118,7 @@ export const CameraPage = () => {
           >
             Add Camera
           </button>
+          </div>
         </div>
       </div>
 

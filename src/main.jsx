@@ -26,6 +26,7 @@ const RouterWrapper = () => {
 
   const settingFunction = (x) => {
     setImportantId(x)
+    console.log(x)
   }
 
   return (

@@ -1,57 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/dashboard.css';
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
   const [selectedTimeframe, setSelectedTimeframe] = useState('24h');
-  
-  // Mock data - replace with real data
-  const stats = {
-    totalCameras: 12,
-    activeCameras: 10,
-    totalRooms: 8,
-    activeRules: 15,
-    alertsToday: 3
-  };
+  const [dashboardData, setDashboardData] = useState({
+    overview: {
+      totalCameras: { count: 0, active: 0 },
+      monitoredRooms: { count: 0, locations: 0 },
+      activeRules: { count: 0, pendingReview: 0 },
+      todaysAlerts: { count: 0, requiresAttention: 0 }
+    },
+    activeMonitors: [],
+    recentAlerts: [],
+    metadata: { lastUpdated: '', timeZone: '' }
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const recentAlerts = [
-    {
-      id: 1,
-      timestamp: '2024-02-23T10:30:00',
-      type: 'safety_violation',
-      location: 'Production Floor',
-      camera: 'Camera 3',
-      status: 'pending'
-    },
-    {
-      id: 2,
-      timestamp: '2024-02-23T09:15:00',
-      type: 'unauthorized_access',
-      location: 'Storage Room',
-      camera: 'Camera 7',
-      status: 'resolved'
-    },
-    // Add more alerts as needed
-  ];
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('https://3e91-89-101-154-45.ngrok-free.app/dashboardstats', {
+          headers: {
+            'Authorization': '123',
+            'Content-Type': 'application/json',
+            'X-User-ID': 'ba3197a8-f182-11ef-80e2-77fbe9534181',
+            'ngrok-skip-browser-warning': '69420'
+          }
+        });
 
-  const activeMonitors = [
-    {
-      id: 1,
-      name: 'Main Entrance',
-      status: 'online',
-      lastCheck: '2 mins ago',
-      metrics: { violations: 0, warnings: 2 }
-    },
-    {
-      id: 2,
-      name: 'Production Line A',
-      status: 'online',
-      lastCheck: '1 min ago',
-      metrics: { violations: 1, warnings: 0 }
-    },
-    // Add more monitors
-  ];
+        if (!response.ok) {
+          throw new Error('Failed to fetch dashboard data');
+        }
+
+        const data = await response.json();
+        setDashboardData(data);
+        setError(null);
+      } catch (err) {
+        setError('Error fetching dashboard data');
+        console.error('Dashboard fetch error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+    // Set up polling interval
+    const interval = setInterval(fetchDashboardData, 60000); // Refresh every minute
+
+    return () => clearInterval(interval);
+  }, [selectedTimeframe]); // Refetch when timeframe changes
 
   const quickActions = [
     {
@@ -80,6 +81,26 @@ export const DashboardPage = () => {
     }
   ];
 
+  if (loading) {
+    return <div className="loading">Loading dashboard data...</div>;
+  }
+
+  if (error) {
+    return <div className="error">{error}</div>;
+  }
+
+  // Format the last check time to be relative (e.g., "2 mins ago")
+  const getRelativeTime = (timestamp) => {
+    const now = new Date();
+    const checkTime = new Date(timestamp);
+    const diffMinutes = Math.floor((now - checkTime) / 60000);
+    
+    if (diffMinutes < 1) return 'just now';
+    if (diffMinutes === 1) return '1 min ago';
+    if (diffMinutes < 60) return `${diffMinutes} mins ago`;
+    return `${Math.floor(diffMinutes / 60)} hours ago`;
+  };
+
   return (
     <div className="dashboard">
       {/* Header Section */}
@@ -105,23 +126,23 @@ export const DashboardPage = () => {
       <div className="stats-grid">
         <div className="stat-card">
           <span className="stat-label">Total Cameras</span>
-          <span className="stat-value">{stats.totalCameras}</span>
-          <span className="stat-subtitle">{stats.activeCameras} active</span>
+          <span className="stat-value">{dashboardData.overview.totalCameras.count}</span>
+          <span className="stat-subtitle">{dashboardData.overview.totalCameras.active} active</span>
         </div>
         <div className="stat-card">
           <span className="stat-label">Monitored Rooms</span>
-          <span className="stat-value">{stats.totalRooms}</span>
-          <span className="stat-subtitle">Across 3 locations</span>
+          <span className="stat-value">{dashboardData.overview.monitoredRooms.count}</span>
+          <span className="stat-subtitle">Across {dashboardData.overview.monitoredRooms.locations} locations</span>
         </div>
         <div className="stat-card">
           <span className="stat-label">Active Rules</span>
-          <span className="stat-value">{stats.activeRules}</span>
-          <span className="stat-subtitle">2 pending review</span>
+          <span className="stat-value">{dashboardData.overview.activeRules.count}</span>
+          <span className="stat-subtitle">{dashboardData.overview.activeRules.pendingReview} pending review</span>
         </div>
         <div className="stat-card highlight">
           <span className="stat-label">Today's Alerts</span>
-          <span className="stat-value">{stats.alertsToday}</span>
-          <span className="stat-subtitle">1 requires attention</span>
+          <span className="stat-value">{dashboardData.overview.todaysAlerts.count}</span>
+          <span className="stat-subtitle">{dashboardData.overview.todaysAlerts.requiresAttention} requires attention</span>
         </div>
       </div>
 
@@ -136,7 +157,7 @@ export const DashboardPage = () => {
             </button>
           </div>
           <div className="monitors-grid">
-            {activeMonitors.map(monitor => (
+            {dashboardData.activeMonitors.map(monitor => (
               <div key={monitor.id} className="monitor-item">
                 <div className="monitor-header">
                   <h3>{monitor.name}</h3>
@@ -147,14 +168,14 @@ export const DashboardPage = () => {
                 <div className="monitor-metrics">
                   <div className="metric">
                     <span className="metric-label">Violations</span>
-                    <span className="metric-value">{monitor.metrics.violations}</span>
+                    <span className="metric-value">{monitor.stats.violations}</span>
                   </div>
                   <div className="metric">
                     <span className="metric-label">Warnings</span>
-                    <span className="metric-value">{monitor.metrics.warnings}</span>
+                    <span className="metric-value">{monitor.stats.warnings}</span>
                   </div>
                 </div>
-                <span className="last-check">Last check: {monitor.lastCheck}</span>
+                <span className="last-check">Last check: {getRelativeTime(monitor.stats.lastCheck)}</span>
               </div>
             ))}
           </div>
@@ -164,31 +185,35 @@ export const DashboardPage = () => {
         <div className="content-card alerts-card">
           <div className="card-header">
             <h2>Recent Alerts</h2>
-            <span className="alert-count">{recentAlerts.length} new alerts</span>
+            <span className="alert-count">{dashboardData.recentAlerts.length} new alerts</span>
           </div>
           <div className="alerts-list">
-            {recentAlerts.map(alert => (
-              <div key={alert.id} className="alert-item">
-                <div className="alert-content">
-                  <div className="alert-type">
-                    <span className={`alert-indicator ${alert.type}`}></span>
-                    {alert.type.replace('_', ' ')}
+            {dashboardData.recentAlerts.length > 0 ? (
+              dashboardData.recentAlerts.map(alert => (
+                <div key={alert.id} className="alert-item">
+                  <div className="alert-content">
+                    <div className="alert-type">
+                      <span className={`alert-indicator ${alert.type}`}></span>
+                      {alert.type.replace('_', ' ')}
+                    </div>
+                    <div className="alert-details">
+                      <span className="alert-location">{alert.location}</span>
+                      <span className="alert-camera">{alert.camera}</span>
+                    </div>
                   </div>
-                  <div className="alert-details">
-                    <span className="alert-location">{alert.location}</span>
-                    <span className="alert-camera">{alert.camera}</span>
+                  <div className="alert-meta">
+                    <span className="alert-time">
+                      {new Date(alert.timestamp).toLocaleTimeString()}
+                    </span>
+                    <span className={`alert-status ${alert.status}`}>
+                      {alert.status}
+                    </span>
                   </div>
                 </div>
-                <div className="alert-meta">
-                  <span className="alert-time">
-                    {new Date(alert.timestamp).toLocaleTimeString()}
-                  </span>
-                  <span className={`alert-status ${alert.status}`}>
-                    {alert.status}
-                  </span>
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <div className="no-alerts">No recent alerts</div>
+            )}
           </div>
         </div>
 
@@ -211,6 +236,13 @@ export const DashboardPage = () => {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Last Updated Information */}
+      <div className="dashboard-footer">
+        <span className="last-updated">
+          Last updated: {new Date(dashboardData.metadata.lastUpdated).toLocaleString()} {dashboardData.metadata.timeZone}
+        </span>
       </div>
     </div>
   );

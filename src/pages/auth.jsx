@@ -1,58 +1,56 @@
 import { createContext, useState } from "react";
-import axios from 'axios';
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const GlobalContext = createContext();
 
-
 export const AuthPage = ({ setImportantId }) => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState()
-  const [password, setPossword] = useState()
-  const [firstName, setFirstName] = useState()
-    
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+
+  // useNavigate is called at the top level of the component
+  const navigate = useNavigate();
 
   const SignUpFunction = () => {
-    axios.post(
-      'https://e71e-89-101-154-45.ngrok-free.app/users',
-      {
-        firstname: firstName,
-        email: email,
-        camera_ids: [],
-        rules_ids: [],
-        rooms_ids: [],
-      },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          // Add any additional headers here
+    axios
+      .post(
+        "https://e71e-89-101-154-45.ngrok-free.app/users",
+        {
+          firstname: firstName,
+          email: email,
+          camera_ids: [],
+          rules_ids: [],
+          rooms_ids: [],
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
         }
-      }
-    )
-    .then(response => {
-      const data = response.data
-      console.log('Response:', data);
-      // Handle the successful response
-      console.log(data.id)
-      let importantId = data.id
-      setImportantId(importantId)
-      const navigate = useNavigate();
-      navigate('/rooms')
-    })
-    .catch(error => {
-      console.error('Error:', error); // Handle any errors
-    });
-  }
+      )
+      .then((response) => {
+        const data = response.data;
+        console.log("Response:", data);
+        let importantId = data.id;
+        setImportantId(importantId);
+        navigate("/dashboard");
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  };
 
   return (
     <div
       style={{
-        /* Accommodates the sidebar width, ensures it doesn't overflow, and centers content */
         minHeight: "100vh",
         background: "linear-gradient(145deg, #fafcff, #e9eef5)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        padding: "60px 20px", // Top and side padding
+        padding: "60px 20px",
         boxSizing: "border-box",
         overflowX: "hidden",
         fontFamily: "Inter, sans-serif",
@@ -101,11 +99,11 @@ export const AuthPage = ({ setImportantId }) => {
             outline: "none",
           }}
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={(e) => setEmail(e.target.value)}
         />
         <input
-          type="firstname"
-          placeholder="FirstName"
+          type="text"
+          placeholder="First Name"
           style={{
             width: "100%",
             padding: "12px",
@@ -116,7 +114,7 @@ export const AuthPage = ({ setImportantId }) => {
             outline: "none",
           }}
           value={firstName}
-          onChange={e => setFirstName(e.target.value)}
+          onChange={(e) => setFirstName(e.target.value)}
         />
         <input
           type="password"
@@ -130,6 +128,8 @@ export const AuthPage = ({ setImportantId }) => {
             fontSize: "14px",
             outline: "none",
           }}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
         />
 
         <button
@@ -169,3 +169,5 @@ export const AuthPage = ({ setImportantId }) => {
     </div>
   );
 };
+
+export default AuthPage;
