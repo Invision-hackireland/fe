@@ -1,45 +1,66 @@
 import React from 'react';
-import Logoicon from '../assets/logo.svg'
-
 import { useNavigate } from 'react-router-dom';
-
-
+import '../styles/landing.css'
 
 function Header() {
-
-  
-    
   return (
     <header className="header">
-        <div style={{magin:0, padding:0}}>
-        {/* <img src={Logoicon} alt="Logo" height={500} width={500}/> */}
+      <div className="container header-content">
+        <div className="logo">
+          <span className="logo-text">Invision</span>
         </div>
-    
-      <nav>
-        <button className="nav-button">button 1</button>
-        <button className="nav-button demo" >button 2</button>
-      </nav>
+        <nav>
+          <button className="nav-button">Product</button>
+          <button className="nav-button">Enterprise</button>
+          <button className="nav-button primary">Get Started →</button>
+        </nav>
+      </div>
     </header>
   );
 }
 
-
-
 function Hero() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const handleNavigation = (link) => {
-      navigate(`/${link}`);
-    };
+  const handleNavigation = (link) => {
+    navigate(`/${link}`);
+  };
+
   return (
     <section className="hero">
-      <h2>Revolutionize Safety & Compliance</h2>
-      <p>
-        Invision uses cutting-edge AI to monitor cameras and ensure everyone adheres to the code of conduct.
-      </p>
-      <div className="cta">
-        <button className="cta-button" onClick={() => handleNavigation("auth")}>Sign Up</button>
-        <button className="cta-button demo" onClick={() => handleNavigation("monitor")}>Demo</button>
+      <div className="container">
+        <div className="hero-content">
+          <h1 className="hero-title">
+            AI-Powered Safety & Compliance
+            <span className="gradient-text"> For The Modern Workplace</span>
+          </h1>
+          <p className="hero-subtitle">
+            Transform your workplace safety with real-time AI monitoring. 
+            Join 500+ companies ensuring compliance with Invision.
+          </p>
+          <div className="cta-group">
+            <button 
+              className="cta-button primary" 
+              onClick={() => handleNavigation("auth")}
+            >
+              Start Free Trial
+            </button>
+            <button 
+              className="cta-button secondary"
+              onClick={() => handleNavigation("monitor")}
+            >
+              Watch Demo →
+            </button>
+          </div>
+          <div className="social-proof">
+            <p>Trusted by innovative companies</p>
+            <div className="company-logos">
+              <div className="logo-placeholder"></div>
+              <div className="logo-placeholder"></div>
+              <div className="logo-placeholder"></div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -48,23 +69,34 @@ function Hero() {
 function Features() {
   return (
     <section className="features">
-      <div className="feature">
-        <h3>Real-Time Monitoring</h3>
-        <p>
-          Our AI system continuously monitors your premises to ensure compliance and immediate alerts.
-        </p>
-      </div>
-      <div className="feature">
-        <h3>Advanced Analytics</h3>
-        <p>
-          Gain valuable insights with robust data analytics to keep your environment safe.
-        </p>
-      </div>
-      <div className="feature">
-        <h3>Easy Integration</h3>
-        <p>
-          Seamlessly integrate Invision with your current security and monitoring systems.
-        </p>
+      <div className="container">
+        <h2 className="section-title">Everything you need for workplace safety</h2>
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="feature-icon monitoring"></div>
+            <h3>Real-Time Monitoring</h3>
+            <p>
+              Advanced AI monitoring system that detects safety violations instantly,
+              providing immediate alerts to prevent incidents.
+            </p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon analytics"></div>
+            <h3>Intelligent Analytics</h3>
+            <p>
+              Transform safety data into actionable insights with our 
+              comprehensive analytics dashboard.
+            </p>
+          </div>
+          <div className="feature-card">
+            <div className="feature-icon integration"></div>
+            <h3>Seamless Integration</h3>
+            <p>
+              Connect with your existing security infrastructure in minutes.
+              No complex setup required.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -73,109 +105,48 @@ function Features() {
 function Footer() {
   return (
     <footer className="footer">
-      <p>&copy; {new Date().getFullYear()} Invision. All rights reserved.</p>
+      <div className="container">
+        <div className="footer-content">
+          <div className="footer-brand">
+            <span className="logo-text">Invision</span>
+            <p>Making workplaces safer with AI</p>
+          </div>
+          <div className="footer-links">
+            <div className="footer-column">
+              <h4>Product</h4>
+              <a href="#">Features</a>
+              <a href="#">Pricing</a>
+              <a href="#">Enterprise</a>
+            </div>
+            <div className="footer-column">
+              <h4>Company</h4>
+              <a href="#">About</a>
+              <a href="#">Blog</a>
+              <a href="#">Careers</a>
+            </div>
+            <div className="footer-column">
+              <h4>Resources</h4>
+              <a href="#">Documentation</a>
+              <a href="#">Support</a>
+              <a href="#">Contact</a>
+            </div>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <p>&copy; {new Date().getFullYear()} Invision. All rights reserved.</p>
+        </div>
+      </div>
     </footer>
   );
 }
 
 export const LandingPage = () => {
   return (
-    <>
+    <div className="landing-page">
       <Header />
       <Hero />
       <Features />
       <Footer />
-      <style>{`
-        /* Global Styles */
-        body, html {
-          margin: 0;
-          padding: 0;
-          font-family: Arial, sans-serif;
-          background-color: #fff;
-          color: #000;
-        }
-        /* Header */
-        .header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 20px;
-          background-color: blue;
-          color: #fff;
-        }
-        .header h1 {
-          margin: 0;
-        }
-        nav {
-          display: flex;
-        }
-        .nav-button {
-          background: none;
-          border: 1px solid #fff;
-          color: #fff;
-          padding: 10px 20px;
-          margin-left: 10px;
-          cursor: pointer;
-          transition: background 0.3s, color 0.3s;
-        }
-        .nav-button:hover {
-          background-color: #fff;
-          color: #000;
-        }
-        /* Hero Section */
-        .hero {
-          padding: 100px 20px;
-          text-align: center;
-        }
-        .hero h2 {
-          font-size: 2.5rem;
-          margin-bottom: 20px;
-        }
-        .hero p {
-          font-size: 1.2rem;
-          margin-bottom: 30px;
-        }
-        .cta-button {
-          background-color: #000;
-          border: 2px solid #000;
-          color: #fff;
-          padding: 15px 30px;
-          margin: 10px;
-          cursor: pointer;
-          transition: background 0.3s, color 0.3s;
-        }
-        .cta-button:hover {
-          background-color: #fff;
-          color: #000;
-        }
-        /* Features Section */
-        .features {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          padding: 50px 20px;
-          background-color: #f4f4f4;
-        }
-        .feature {
-          flex: 1 1 300px;
-          margin: 20px;
-          padding: 20px;
-          border: 1px solid #ddd;
-          border-radius: 5px;
-          text-align: center;
-        }
-        .feature h3 {
-          margin-bottom: 10px;
-        }
-        /* Footer */
-        .footer {
-          padding: 20px;
-          text-align: center;
-          background-color: #000;
-          color: #fff;
-        }
-      `}</style>
-    </>
+    </div>
   );
 }
-
