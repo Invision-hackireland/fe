@@ -15,39 +15,41 @@ export const RulesPage = ({ImportantId}) => {
   const [selectAll, setSelectAll] = useState(false);      // whether "All" is selected
   const [showDropdown, setShowDropdown] = useState(false); // controls open/close of dropdown
 
-  // Fetch list of all rooms on component mount
+  // 1. Fetch ALL rooms on component mount
   useEffect(() => {
     // GET /rooms?user_id=YOUR_USER_UUID
     fetch(`${BASE_API_URL}/rooms?user_id=${USER_ID}`)
       .then(res => res.json())
       .then(data => {
-        // data is an array of objects like:
-        // [
-        //   {
-        //     "id": "81bcfc72-3254-4360-94f4-41912fc7f32f",
-        //     "name": "Backyard",
-        //     "num_cameras": 1,
-        //     "num_rules": 2
-        //   },
-        //   ...
-        // ]
         setAllRooms(data);
       })
       .catch(err => console.error('Error fetching rooms:', err));
   }, []);
 
-  // Add new rule (local state + POST to API)
+  // 2. Fetch the rules on component mount
+  useEffect(() => {
+    // GET /rules?user_id=YOUR_USER_UUID
+    fetch(`${BASE_API_URL}/rules?user_id=${USER_ID}`)
+      .then(res => res.json())
+      .then(data => {
+        // 'data' is an array with user objects; each user object has a "rules" array
+        if (Array.isArray(data) && data.length > 0) {
+          const fetchedRules = data[0].rules.map(rule => {
+            return {
+              ...rule,
+              status: 'active',              // local status, default "active"
+              date_created: new Date().toISOString() // or any placeholder date
+            };
+          });
+          setRules(fetchedRules);
+        }
+      })
+      .catch(err => console.error('Error fetching rules:', err));
+  }, []);
+
+  // 3. Add new rule (local state + POST to API)
   const addRule = async () => {
     if (!ruleText.trim()) return;
-
-    // Local representation of the new rule
-    const newRule = {
-      id: Date.now(),                   // temporary local ID
-      rule: ruleText,
-      date_created: new Date().toISOString(),
-      status: 'active',
-      category: 'custom'
-    };
 
     // Prepare payload for the backend
     const payload = {
@@ -55,8 +57,8 @@ export const RulesPage = ({ImportantId}) => {
       user_id: USER_ID
     };
 
+    // If "All" is selected
     if (selectAll) {
-      // If "All" is selected
       payload.shared = true;
     } else {
       // If specific rooms are selected
@@ -64,7 +66,6 @@ export const RulesPage = ({ImportantId}) => {
       payload.rooms_ids = selectedRooms;
     }
 
-    // Make the POST request
     try {
       const response = await fetch(`${BASE_API_URL}/rules`, {
         method: 'POST',
@@ -78,23 +79,40 @@ export const RulesPage = ({ImportantId}) => {
         return;
       }
 
-      // If successful, update local state
-      setRules([...rules, newRule]);
+      // Assuming the response returns the newly created rule object (with an 'id')
+      const createdRule = await response.json();
+
+      // Construct a local version of the rule
+      const newLocalRule = {
+        ...createdRule, 
+        status: 'active',
+        date_created: new Date().toISOString(),
+        // If the API doesn't return rooms, we replicate them from local selection:
+        rooms: payload.shared
+          ? [] 
+          : allRooms.filter(room => selectedRooms.includes(room.id))
+      };
+
+      // Update local state
+      setRules(prev => [...prev, newLocalRule]);
+
+      // Reset inputs
       setRuleText('');
       setSelectAll(false);
       setSelectedRooms([]);
       setShowDropdown(false);
+
     } catch (error) {
       console.error('Failed to add rule:', error);
     }
   };
 
-  // Delete rule (local only in this example)
+  // 4. Delete rule (local only in this example)
   const deleteRule = (id) => {
     setRules(rules.filter(rule => rule.id !== id));
   };
 
-  // Toggle rule status (local only in this example)
+  // 5. Toggle rule status (local only in this example)
   const toggleRuleStatus = (id) => {
     setRules(rules.map(rule =>
       rule.id === id
@@ -103,7 +121,7 @@ export const RulesPage = ({ImportantId}) => {
     ));
   };
 
-  // Handle file selection (PDF only)
+  // 6. Handle file selection (PDF only)
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     if (file && file.type === 'application/pdf') {
@@ -111,12 +129,12 @@ export const RulesPage = ({ImportantId}) => {
     }
   };
 
-  // Filter rules based on search query
+  // 7. Filter rules based on search query (search by rule.text)
   const filteredRules = rules.filter(rule =>
-    rule.rule.toLowerCase().includes(searchQuery.toLowerCase())
+    rule.text.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Toggle the "All" checkbox
+  // 8. Handle the "select all" checkbox
   const handleSelectAll = () => {
     // If turning "All" on, clear the individually selected rooms
     if (!selectAll) {
@@ -125,7 +143,7 @@ export const RulesPage = ({ImportantId}) => {
     setSelectAll(!selectAll);
   };
 
-  // Handle the selection of an individual room
+  // 9. Handle the selection of an individual room
   const handleRoomCheckbox = (roomId) => {
     if (selectedRooms.includes(roomId)) {
       setSelectedRooms(selectedRooms.filter(id => id !== roomId));
@@ -185,43 +203,43 @@ export const RulesPage = ({ImportantId}) => {
                 </div>
               </div>
 
-<div className="rooms-dropdown-container">
-  <button
-    className="rooms-dropdown-toggle"
-    onClick={() => setShowDropdown(!showDropdown)}
-  >
-    {selectAll ? 'All Rooms Selected' : 'Select Rooms'}
-  </button>
+              {/* Rooms Selection Dropdown */}
+              <div className="rooms-dropdown-container">
+                <button
+                  className="rooms-dropdown-toggle"
+                  onClick={() => setShowDropdown(!showDropdown)}
+                >
+                  {selectAll ? 'All Rooms Selected' : 'Select Rooms'}
+                </button>
 
-  {showDropdown && (
-    <div className="rooms-dropdown-menu">
-      <div className="rooms-dropdown-item">
-        <label>
-          <input
-            type="checkbox"
-            checked={selectAll}
-            onChange={handleSelectAll}
-          />
-          All
-        </label>
-      </div>
-      {/* Map your rooms */}
-      {!selectAll && allRooms.map(room => (
-        <div className="rooms-dropdown-item" key={room.id}>
-          <label>
-            <input
-              type="checkbox"
-              checked={selectedRooms.includes(room.id)}
-              onChange={() => handleRoomCheckbox(room.id)}
-            />
-            {room.name}
-          </label>
-        </div>
-      ))}
-    </div>
-  )}
-</div>
-
+                {showDropdown && (
+                  <div className="rooms-dropdown-menu">
+                    <div className="rooms-dropdown-item">
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={selectAll}
+                          onChange={handleSelectAll}
+                        />
+                        All
+                      </label>
+                    </div>
+                    {/* List individual rooms if not "All" */}
+                    {!selectAll && allRooms.map(room => (
+                      <div className="rooms-dropdown-item" key={room.id}>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={selectedRooms.includes(room.id)}
+                            onChange={() => handleRoomCheckbox(room.id)}
+                          />
+                          {room.name}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Upload PDF Section */}
               <div className="upload-section">
@@ -259,7 +277,7 @@ export const RulesPage = ({ImportantId}) => {
                 <table className="rules-table">
                   <thead>
                     <tr>
-                      <th>Rule</th>
+                      <th>Rule & Rooms</th>
                       <th>Status</th>
                       <th>Date Created</th>
                       <th>Actions</th>
@@ -268,7 +286,22 @@ export const RulesPage = ({ImportantId}) => {
                   <tbody>
                     {filteredRules.map(rule => (
                       <tr key={rule.id}>
-                        <td className="rule-text">{rule.rule}</td>
+                        <td className="rule-text">
+                          {/* Display the rule text */}
+                          <strong>{rule.text}</strong>
+                          {/* If shared, show ALL. Otherwise, show each room */}
+                          {rule.shared ? (
+                            <div className="room-tags">
+                              <span className="room-tag">ALL</span>
+                            </div>
+                          ) : (
+                            <div className="room-tags">
+                              {rule.rooms && rule.rooms.map(room => (
+                                <span key={room.id} className="room-tag">{room.name}</span>
+                              ))}
+                            </div>
+                          )}
+                        </td>
                         <td>
                           <span className={`status-badge ${rule.status}`}>
                             {rule.status}
@@ -300,6 +333,16 @@ export const RulesPage = ({ImportantId}) => {
               </div>
             </div>
           )}
+
+          {/* If no rules yet, you could display an empty state message */}
+          {rules.length === 0 && (
+            <div className="content-card">
+              <div className="empty-state">
+                <p>No rules found. Add your first rule above.</p>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </div>
