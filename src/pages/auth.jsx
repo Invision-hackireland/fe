@@ -1,7 +1,46 @@
-import { useState } from "react";
+import { createContext, useState } from "react";
+import axios from 'axios';
+
+const GlobalContext = createContext();
+
 
 export const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState()
+  const [password, setPossword] = useState()
+  const [firstName, setFirstName] = useState()
+    
+
+  const SignUpFunction = () => {
+    axios.post(
+      'https://e71e-89-101-154-45.ngrok-free.app/users',
+      {
+        firstname: firstName,
+        email: email,
+        camera_ids: [],
+        rules_ids: [],
+        rooms_ids: [],
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          // Add any additional headers here
+        }
+      }
+    )
+    .then(response => {
+      const data = response.data
+      console.log('Response:', data);
+      // Handle the successful response
+      console.log(data.id)
+      importantId = data.id
+      const navigate = useNavigate();
+      navigate('/rooms')
+    })
+    .catch(error => {
+      console.error('Error:', error); // Handle any errors
+    });
+  }
 
   return (
     <div
@@ -60,6 +99,23 @@ export const AuthPage = () => {
             fontSize: "14px",
             outline: "none",
           }}
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
+        <input
+          type="firstname"
+          placeholder="FirstName"
+          style={{
+            width: "100%",
+            padding: "12px",
+            marginBottom: "12px",
+            border: "1px solid #ddd",
+            borderRadius: "8px",
+            fontSize: "14px",
+            outline: "none",
+          }}
+          value={firstName}
+          onChange={e => setFirstName(e.target.value)}
         />
         <input
           type="password"
@@ -90,6 +146,7 @@ export const AuthPage = () => {
           }}
           onMouseOver={(e) => (e.target.style.background = "#005fcb")}
           onMouseOut={(e) => (e.target.style.background = "#007aff")}
+          onClick={SignUpFunction}
         >
           {isLogin ? "Log In" : "Sign Up"}
         </button>

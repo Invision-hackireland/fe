@@ -10,7 +10,7 @@ const Sidebar = () => {
     { name: "Cameras", path: "/camera", icon: <FaVideo /> },
     { name: "Monitor", path: "/monitor", icon: <FaDesktop /> },
     { name: "Rules", path: "/rules", icon: <FaShieldAlt /> },
-    { name: "Settings", path: "/auth", icon: <FaCog /> },
+    { name: "Rooms", path: "/rooms", icon: <FaCog /> },
   ];
 
   return (

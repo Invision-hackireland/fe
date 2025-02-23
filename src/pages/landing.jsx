@@ -6,28 +6,31 @@ import { useNavigate } from 'react-router-dom';
 
 
 function Header() {
-    const navigate = useNavigate();
 
-    const handleNavigation = () => {
-      navigate('/monitor');
-    };
   
     
   return (
     <header className="header">
         <div style={{magin:0, padding:0}}>
-        <img src={Logoicon} alt="Logo" height={500} width={500}/>
+        {/* <img src={Logoicon} alt="Logo" height={500} width={500}/> */}
         </div>
     
       <nav>
-        <button className="nav-button">Sign Up</button>
-        <button className="nav-button demo" onClick={handleNavigation}>Demo</button>
+        <button className="nav-button">button 1</button>
+        <button className="nav-button demo" >button 2</button>
       </nav>
     </header>
   );
 }
 
+
+
 function Hero() {
+    const navigate = useNavigate();
+
+    const handleNavigation = (link) => {
+      navigate(`/${link}`);
+    };
   return (
     <section className="hero">
       <h2>Revolutionize Safety & Compliance</h2>
@@ -35,8 +38,8 @@ function Hero() {
         Invision uses cutting-edge AI to monitor cameras and ensure everyone adheres to the code of conduct.
       </p>
       <div className="cta">
-        <button className="cta-button">Sign Up</button>
-        <button className="cta-button demo">Demo</button>
+        <button className="cta-button" onClick={() => handleNavigation("auth")}>Sign Up</button>
+        <button className="cta-button demo" onClick={() => handleNavigation("monitor")}>Demo</button>
       </div>
     </section>
   );
