@@ -8,7 +8,7 @@ const Sidebar = () => {
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: <FaHome /> },
     { name: "Cameras", path: "/camera", icon: <FaVideo /> },
-    { name: "Monitor", path: "/monitor", icon: <FaDesktop /> },
+    { name: "Logs", path: "/logs", icon: <FaDesktop /> },
     { name: "Rules", path: "/rules", icon: <FaShieldAlt /> },
     { name: "Rooms", path: "/rooms", icon: <FaCog /> },
   ];
