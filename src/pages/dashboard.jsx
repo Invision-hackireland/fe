@@ -1,97 +1,126 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import '../styles/dashboard.css';
-import { BASE_API_URL } from '../constants';
-import { USER_ID } from '../constants';
 
-export const DashboardPage = ({ImportantId}) => {
-  const navigate = useNavigate();
+export const DashboardPage = () => {
   const [selectedTimeframe, setSelectedTimeframe] = useState('24h');
-  const [dashboardData, setDashboardData] = useState({
+  
+  // Mock data structure
+  const [dashboardData] = useState({
     overview: {
-      totalCameras: { count: 0, active: 0 },
-      monitoredRooms: { count: 0, locations: 0 },
-      activeRules: { count: 0, pendingReview: 0 },
-      todaysAlerts: { count: 0, requiresAttention: 0 }
+      totalCameras: { count: 12, active: 8 },
+      monitoredRooms: { count: 6, locations: 2 },
+      activeRules: { count: 15, pendingReview: 3 },
+      todaysAlerts: { count: 8, requiresAttention: 2 }
     },
-    activeMonitors: [],
-    recentAlerts: [],
-    metadata: { lastUpdated: '', timeZone: '' }
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${BASE_API_URL}/dashboardstats`, {
-          headers: {
-            'Authorization': '123',
-            'Content-Type': 'application/json',
-            'X-User-ID': `${USER_ID}`,
-            'ngrok-skip-browser-warning': '69420'
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch dashboard data');
+    activeMonitors: [
+      {
+        id: "mon_1",
+        name: "Main Entrance",
+        status: "active",
+        stats: {
+          violations: 2,
+          warnings: 5,
+          lastCheck: new Date(Date.now() - 5 * 60000).toISOString()
         }
-
-        const data = await response.json();
-        setDashboardData(data);
-        setError(null);
-      } catch (err) {
-        setError('Error fetching dashboard data');
-        console.error('Dashboard fetch error:', err);
-      } finally {
-        setLoading(false);
+      },
+      {
+        id: "mon_2",
+        name: "Production Floor A",
+        status: "warning",
+        stats: {
+          violations: 1,
+          warnings: 3,
+          lastCheck: new Date(Date.now() - 2 * 60000).toISOString()
+        }
+      },
+      {
+        id: "mon_3",
+        name: "Loading Dock",
+        status: "active",
+        stats: {
+          violations: 0,
+          warnings: 1,
+          lastCheck: new Date(Date.now() - 8 * 60000).toISOString()
+        }
+      },
+      {
+        id: "mon_4",
+        name: "Assembly Line B",
+        status: "active",
+        stats: {
+          violations: 0,
+          warnings: 2,
+          lastCheck: new Date(Date.now() - 1 * 60000).toISOString()
+        }
       }
-    };
-
-    fetchDashboardData();
-    // Set up polling interval
-    const interval = setInterval(fetchDashboardData, 60000); // Refresh every minute
-
-    return () => clearInterval(interval);
-  }, [selectedTimeframe]); // Refetch when timeframe changes
+    ],
+    recentAlerts: [
+      {
+        id: "alt_1",
+        type: "safety_violation",
+        location: "Production Floor A",
+        camera: "Camera 2",
+        timestamp: new Date(Date.now() - 15 * 60000).toISOString(),
+        status: "pending"
+      },
+      {
+        id: "alt_2",
+        type: "equipment_warning",
+        location: "Loading Dock",
+        camera: "Camera 5",
+        timestamp: new Date(Date.now() - 25 * 60000).toISOString(),
+        status: "resolved"
+      },
+      {
+        id: "alt_3",
+        type: "motion_detected",
+        location: "Main Entrance",
+        camera: "Camera 1",
+        timestamp: new Date(Date.now() - 45 * 60000).toISOString(),
+        status: "active"
+      },
+      {
+        id: "alt_4",
+        type: "safety_violation",
+        location: "Assembly Line B",
+        camera: "Camera 4",
+        timestamp: new Date(Date.now() - 60 * 60000).toISOString(),
+        status: "pending"
+      }
+    ],
+    metadata: {
+      lastUpdated: new Date().toISOString(),
+      timeZone: "UTC"
+    }
+  });
 
   const quickActions = [
     {
       title: 'Add Camera',
       description: 'Set up a new camera in your network',
       icon: '📹',
-      action: () => navigate('/camera')
+      action: () => console.log('Navigate to camera')
     },
     {
       title: 'Manage Rules',
       description: 'Configure safety rules and alerts',
       icon: '📋',
-      action: () => navigate('/rules')
+      action: () => console.log('Navigate to rules')
     },
     {
       title: 'View Reports',
       description: 'Access detailed safety reports',
       icon: '📊',
-      action: () => navigate('/logs')
+      action: () => console.log('Navigate to logs')
     },
     {
       title: 'Add Room',
       description: 'Create a new monitored area',
       icon: '🏢',
-      action: () => navigate('/rooms')
+      action: () => console.log('Navigate to rooms')
     }
   ];
 
-  if (loading) {
-    return <div className="loading">Loading dashboard data...</div>;
-  }
-
-  if (error) {
-    return <div className="error">{error}</div>;
-  }
-
-  // Format the last check time to be relative (e.g., "2 mins ago")
   const getRelativeTime = (timestamp) => {
     const now = new Date();
     const checkTime = new Date(timestamp);
@@ -154,7 +183,10 @@ export const DashboardPage = ({ImportantId}) => {
         <div className="content-card monitors-card">
           <div className="card-header">
             <h2>Active Monitors</h2>
-            <button className="view-all-button" onClick={() => navigate('/monitor')}>
+            <button 
+              className="view-all-button"
+              onClick={() => console.log('Navigate to monitors')}
+            >
               View All
             </button>
           </div>
@@ -249,3 +281,5 @@ export const DashboardPage = ({ImportantId}) => {
     </div>
   );
 };
+
+export default DashboardPage;
