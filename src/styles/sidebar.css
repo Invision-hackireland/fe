@@ -1,78 +1,137 @@
-/* Reset body margin */
+/* Reset and base styles */
 body {
-    margin: 0;
-    font-family: "Inter", sans-serif;
-    background: #f9f9f9;
-    overflow-x: hidden;
+  margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #fafafa;
+  overflow-x: hidden;
+  color: #111827;
+}
+
+/* Sleek sidebar with improved aesthetics */
+.sleek-sidebar {
+  width: 240px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #f0f0f0;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  left: -1px;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+/* Adjusted main content spacing */
+.main-content {
+  margin-left: 240px;
+  padding: 32px;
+  max-width: 1200px;
+}
+
+/* Modern logo styling */
+.sidebar-logo {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #111827;
+}
+
+/* Enhanced menu styling */
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sidebar-item {
+  margin: 0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  color: #4b5563;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+/* Improved hover and active states */
+.sidebar-link:hover {
+  background: #f8fafc;
+  color: #2563eb;
+}
+
+.sidebar-item.active .sidebar-link {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+/* Icon styling */
+.sidebar-link svg {
+  width: 18px;
+  height: 18px;
+  opacity: 0.75;
+  transition: all 0.2s ease;
+}
+
+.sidebar-link:hover svg,
+.sidebar-item.active .sidebar-link svg {
+  opacity: 1;
+}
+
+/* Bottom section of sidebar */
+.sidebar-bottom {
+  margin-top: auto;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #111827;
+    color: #f9fafb;
   }
   
-  /* Sidebar styles */
   .sleek-sidebar {
-    width: 220px;
-    height: 100vh;
-    background: #ffffff;
-    border-right: 1px solid #e0e0e0;
-    padding: 10px 0px 0px 10px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-  
-    /* Make sidebar fixed so it never moves on scroll */
-    position: fixed;
-    top: 0;
-    left: 0;
+    background: #1f2937;
+    border-right-color: #374151;
   }
   
-  /* Ensure the main content doesn't overlap the sidebar */
-  .main-content {
-    margin-left: 220px; /* Matches sidebar width */
-    padding: 20px;
-  }
-  
-  /* Sidebar Logo */
   .sidebar-logo {
-    font-size: 18px;
-    font-weight: bold;
-    text-align: center;
-    padding-bottom: 10px;
-    color: #333;
-    border-bottom: 1px solid #eaeaea;
-  }
-  
-  /* Sidebar Menu */
-  .sidebar-menu {
-    list-style: none;
-    padding: 0;
-    margin-top: 20px;
-  }
-  
-  .sidebar-item {
-    margin: 10px 0;
+    color: #f9fafb;
+    border-bottom-color: #374151;
   }
   
   .sidebar-link {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px;
-    border-radius: 10px;
-    color: #333;
-    text-decoration: none;
-    font-size: 14px;
-    transition: all 0.3s ease;
+    color: #9ca3af;
   }
   
-  .sidebar-link:hover,
+  .sidebar-link:hover {
+    background: #374151;
+    color: #60a5fa;
+  }
+  
   .sidebar-item.active .sidebar-link {
-    background: #f3f3f3;
-    color: #007aff;
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.08);
+    background: #2563eb;
+    color: #ffffff;
   }
   
-  /* Sidebar Icons */
-  .sidebar-link svg {
-    width: 18px;
-    height: 18px;
+  .sidebar-bottom {
+    border-top-color: #374151;
   }
-  
+}
