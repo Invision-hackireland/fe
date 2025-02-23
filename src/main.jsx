@@ -36,7 +36,7 @@ const RouterWrapper = () => {
         <Route path="/" element={<LandingPage/>} />
         <Route path="/dashboard" element={<PageContainer><DashboardPage ImportantId={importantId}/></PageContainer>} />
         <Route path="/auth" element={<AuthPage setImportantId={settingFunction} />} />
-        <Route path="/logs" element={<PageContainer><LogsPage  ImportantId={importantId}/></PageContainer>} />
+        <Route path="/logs" element={<LogsPage  ImportantId={importantId}/>} />
         <Route path="/camera" element={<PageContainer><CameraPage  ImportantId={importantId}/></PageContainer>} />
         <Route path="/rules" element={<PageContainer><RulesPage  ImportantId={importantId}/></PageContainer>} />
         <Route path="/rooms" element={<PageContainer><RoomsPage  ImportantId={importantId}/></PageContainer>} />

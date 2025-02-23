@@ -196,7 +196,6 @@ export const CameraPage = ({ImportantId}) => {
               <thead>
                 <tr>
                   <th>Room</th>
-                  <th>IP Address</th>
                   <th>Status</th>
                   <th>Date Added</th>
                   <th>Actions</th>
@@ -206,9 +205,6 @@ export const CameraPage = ({ImportantId}) => {
                 {cameras.map(camera => (
                   <tr key={camera.id}>
                     <td>{camera.room}</td>
-                    <td>
-                      <code className="ip-address">{camera.ipAddress}</code>
-                    </td>
                     <td>
                       <span className={getStatusClass(camera.status)}>
                         Online

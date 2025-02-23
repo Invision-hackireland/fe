@@ -1,187 +1,299 @@
-import React, { useState, useCallback } from 'react';
-import { useDropzone } from "react-dropzone";
+import React, { useState, useEffect, useCallback } from 'react';
+import { Camera, Upload, AlertCircle, CheckCircle, AlertTriangle, Shield, Clock } from 'lucide-react';
 import '../styles/logs.css';
 
-// Import your video assets
-import video1 from '../assets/video1.mp4';
-import video2 from '../assets/video2.mp4';
-import video3 from '../assets/video3.mp4';
+export const LogsPage = () => {
+  const [cameras, setCameras] = useState([]);
+  const [selectedCamera, setSelectedCamera] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [simulationResults, setSimulationResults] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
-export const LogsPage = ({ImportantId}) => {
-  const cameras = [
-    { 
-      id: 1, 
-      name: 'Main Entrance', 
-      video: video1,
-      status: 'active',
-      analysis: 'Analysis shows normal activity patterns. No safety violations detected in the last hour. Foot traffic remains within expected parameters.' 
-    },
-    { 
-      id: 2, 
-      name: 'Production Floor', 
-      video: video2,
-      status: 'warning',
-      analysis: 'Analysis for Camera 2' 
-    },
-    { 
-      id: 3, 
-      name: 'Loading Dock', 
-      video: video3,
-      status: 'active',
-      analysis: 'Analysis for Camera 3' 
-    },
-  ];
-
-  const [selectedCamera, setSelectedCamera] = useState(cameras[0]);
-  const [dataURL, setDataURL] = useState(null);
-  const [uploadedURL, setUploadedURL] = useState(null);
-
-  const handleCameraChange = (e) => {
-    const cameraId = parseInt(e.target.value, 10);
-    const newCamera = cameras.find((cam) => cam.id === cameraId);
-    setSelectedCamera(newCamera);
-  };
-
-  const onDrop = useCallback(acceptedFiles => {
-    acceptedFiles.forEach(file => {
-      const reader = new FileReader();
-      reader.onabort = () => console.log("file reading was aborted");
-      reader.onerror = () => console.log("file reading has failed");
-      reader.onload = () => {
-        const binaryStr = reader.result;
-        setDataURL(binaryStr);
-      };
-      reader.readAsDataURL(file);
-    });
-  }, []);
-
-  const {
-    getRootProps,
-    acceptedFiles,
-    getInputProps,
-    isDragActive,
-  } = useDropzone({ onDrop });
-
-  const selectedFile = acceptedFiles[0];
-
-  const uploadImage = async () => {
-    if (!selectedFile) return;
-    
-    let formData = new FormData();
-    formData.append("file", selectedFile);
-    formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
-    formData.append("api_key", import.meta.env.VITE_CLOUDINARY_API_KEY);
-
-    try {
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-      const data = await response.json();
-      setUploadedURL(data.url);
-    } catch (error) {
-      console.error("Upload failed:", error);
+  const getSeverityColor = (severity) => {
+    switch (severity.toLowerCase()) {
+      case 'high':
+        return 'high-severity';
+      case 'medium':
+        return 'medium-severity';
+      case 'low':
+        return 'low-severity';
+      default:
+        return '';
     }
   };
 
-  return (
-    <div className="logs-page">
-      <div className="logs-header">
-        <h1>Camera logs</h1>
-        <div className="camera-controls">
-          <select 
-            className="camera-select" 
-            onChange={handleCameraChange}
-            value={selectedCamera.id}
-          >
-            {cameras.map((camera) => (
-              <option key={camera.id} value={camera.id}>
-                {camera.name}
-              </option>
-            ))}
-          </select>
-          <button className="refresh-button">
-            Refresh
-          </button>
+  const formatTime = (timestamp) => {
+    return new Date(timestamp).toLocaleTimeString();
+  };
+
+  useEffect(() => {
+    const fetchCameras = async () => {
+      try {
+        const response = await fetch('http://0.0.0.0:8000/cameras?user_id=ba3197a8-f182-11ef-80e2-77fbe9534181');
+        const data = await response.json();
+        setCameras(data);
+        if (data.length > 0) {
+          setSelectedCamera(data[0]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch cameras:', error);
+      }
+    };
+
+    fetchCameras();
+  }, []);
+
+  const handleCameraChange = (e) => {
+    const camera = cameras.find(cam => cam.id === e.target.value);
+    setSelectedCamera(camera);
+    setSimulationResults(null);
+  };
+
+  const handleDrag = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback((e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    const file = e.dataTransfer.files[0];
+    if (file && file.type === 'video/mp4') {
+      setUploadedFile(file);
+    } else {
+      alert('Please upload an MP4 file');
+    }
+  }, []);
+
+  const handleFileInput = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'video/mp4') {
+      setUploadedFile(file);
+    } else {
+      alert('Please upload an MP4 file');
+    }
+  };
+
+  const handleSimulation = async () => {
+    if (!selectedCamera || !uploadedFile) return;
+
+    setIsLoading(true);
+
+    try {
+      // Construct query parameters
+      const params = new URLSearchParams({
+        video_id: uploadedFile.name,
+        camera_id: selectedCamera.id,
+      });
+
+      const response = await fetch(`http://0.0.0.0:8000/simulate?${params.toString()}`, {
+        method: 'GET', // Change to 'POST' if required
+      });
+
+      const data = await response.json();
+      setSimulationResults(data);
+    } catch (error) {
+      console.error('Simulation failed:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderResults = () => {
+    if (!simulationResults) return null;
+
+    return (
+      <div className="analysis-content">
+        <div className="summary-section">
+          <div className="summary-header">
+            <h3>Summary</h3>
+            <span className="simulation-id">ID: {simulationResults.simulation_id}</span>
+          </div>
+          <div className="summary-stats">
+            <div className="stat-item">
+              <Shield className="stat-icon" />
+              <span className="stat-value">{simulationResults.summary.total_breaches}</span>
+              <span className="stat-label">Total Breaches</span>
+            </div>
+            <div className="stat-item">
+              <Clock className="stat-icon" />
+              <span className="stat-value">{new Date(simulationResults.timestamp).toLocaleTimeString()}</span>
+              <span className="stat-label">Timestamp</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="breaches-section">
+          <h3>Detected Breaches</h3>
+          {simulationResults.breaches.length > 0 ? (
+            simulationResults.breaches.map((breach) => (
+              <div key={breach.id} className="breach-card">
+                <div className="breach-header">
+                  <div className="breach-title">
+                    <Shield className="breach-icon" />
+                    <span>{breach.description}</span>
+                  </div>
+                  <span className="breach-time">
+                    {new Date(breach.timestamp).toLocaleTimeString()}
+                  </span>
+                </div>
+
+                <div className="breach-details">
+                  <div className="detail-item">
+                    <span className="detail-label">Rule ID:</span>
+                    <span className="detail-value">{breach.rule_id}</span>
+                  </div>
+                  {breach.severity && (
+                    <div className="detail-item">
+                      <span className="detail-label">Severity:</span>
+                      <span className="detail-value">{breach.severity}</span>
+                    </div>
+                  )}
+                  {breach.confidence && (
+                    <div className="detail-item">
+                      <span className="detail-label">Confidence:</span>
+                      <span className="detail-value">
+                        {(breach.confidence * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  )}
+                  {breach.location && (
+                    <div className="detail-item">
+                      <span className="detail-label">Location:</span>
+                      <span className="detail-value">{breach.location}</span>
+                    </div>
+                  )}
+                </div>
+
+                {breach.metadata && Object.keys(breach.metadata).length > 0 && (
+                  <div className="metadata-grid">
+                    {Object.entries(breach.metadata).map(([key, value]) => (
+                      <div key={key} className="metadata-item">
+                        <span className="metadata-label">{key.replace(/_/g, ' ')}:</span>
+                        <span className="metadata-value">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="no-breaches">
+              <CheckCircle className="no-breaches-icon" />
+              <p>No breaches detected</p>
+            </div>
+          )}
         </div>
       </div>
+    );
+  };
 
-      <div className="logs-grid">
-        <div className="video-section">
-          <div className="video-container">
-            <div className="video-header">
-              <h2>{selectedCamera.name}</h2>
-              <span className={`status-indicator ${selectedCamera.status}`}>
-                {selectedCamera.status === 'active' ? 'Live' : 'Warning'}
-              </span>
-            </div>
-            <video controls className="video-player">
-              <source src={selectedCamera.video} type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+  return (
+    <div className="simulation-page">
+      <div className="main-content">
+        <div className="page-header">
+          <h1 className="page-title">Camera Simulation</h1>
+          <p className="page-subtitle">Upload video feeds and run simulations</p>
+        </div>
+
+        <div className="camera-section">
+          <div className="camera-select-container">
+            <h2 className="section-title">Camera Selection</h2>
+            <select
+              className="camera-select"
+              value={selectedCamera?.id || ''}
+              onChange={handleCameraChange}
+            >
+              {cameras.map(camera => (
+                <option key={camera.id} value={camera.id}>
+                  {camera.room.name} - {camera.id}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="upload-section">
-            <div {...getRootProps()} className="dropzone">
-              <input {...getInputProps()} />
-              {isDragActive ? (
-                <p>Drop the files here ...</p>
-              ) : (
-                <p>Drag & drop files here, or click to select</p>
+            <h2 className="section-title">Upload Video Feed</h2>
+            <div
+              className={`dropzone ${dragActive ? 'active' : ''}`}
+              onDragEnter={handleDrag}
+              onDragLeave={handleDrag}
+              onDragOver={handleDrag}
+              onDrop={handleDrop}
+            >
+              <input
+                type="file"
+                accept="video/mp4"
+                onChange={handleFileInput}
+              />
+              <Upload className="upload-icon" />
+              <p className="upload-text">
+                Drag and drop your MP4 file here, or click to select
+              </p>
+              {uploadedFile && (
+                <div className="file-info">
+                  <CheckCircle />
+                  <span>{uploadedFile.name}</span>
+                </div>
               )}
             </div>
-            {selectedFile && (
-              <button 
-                className="upload-button"
-                onClick={uploadImage}
-              >
-                Upload Selected File
-              </button>
-            )}
+
+            <button
+              className="button"
+              onClick={handleSimulation}
+              disabled={!selectedCamera || !uploadedFile || isLoading}
+            >
+              {isLoading ? 'Running Simulation...' : 'Run Simulation'}
+            </button>
           </div>
+
+          {uploadedFile && (
+            <div className="video-preview">
+              <video controls>
+                <source src={URL.createObjectURL(uploadedFile)} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="sidebar">
+        <div className="sidebar-header">
+          <Camera />
+          <h2 className="sidebar-title">Analysis Results</h2>
         </div>
 
-        <div className="analysis-section">
-          <div className="analysis-header">
-            <h2>AI Analysis</h2>
-            <span className="timestamp">Updated 2 minutes ago</span>
-          </div>
-          
-          <div className="analysis-content">
-            <div className="analysis-card">
-              <h3>Safety Status</h3>
-              <div className="status-indicator-large active">
-                All Clear
-              </div>
-            </div>
-
-            <div className="analysis-card">
-              <h3>Current Analysis</h3>
-              <p>{selectedCamera.analysis}</p>
-            </div>
-
-            <div className="analysis-card">
-              <h3>Recent Events</h3>
-              <ul className="event-list">
-                <li>
-                  <span className="event-time">10:45 AM</span>
-                  <span className="event-description">Normal activity detected</span>
-                </li>
-                <li>
-                  <span className="event-time">10:30 AM</span>
-                  <span className="event-description">Shift change completed</span>
-                </li>
-                <li>
-                  <span className="event-time">10:15 AM</span>
-                  <span className="event-description">Equipment check passed</span>
-                </li>
-              </ul>
+        {selectedCamera && (
+          <div className="camera-status">
+            <div className="status-indicator">
+              <div className="status-dot"></div>
+              <span>Camera Active: {selectedCamera.room.name}</span>
             </div>
           </div>
-        </div>
+        )}
+
+        {isLoading ? (
+          <div className="loading-state">
+            <div className="spinner"></div>
+            <p className="loading-text">Processing simulation...</p>
+          </div>
+        ) : simulationResults ? (
+          renderResults()
+        ) : (
+          <div className="empty-state">
+            <AlertCircle className="empty-icon" />
+            <p>Upload a video and run a simulation to see results</p>
+          </div>
+        )}
       </div>
     </div>
   );
